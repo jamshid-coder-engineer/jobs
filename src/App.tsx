@@ -6,6 +6,7 @@ import EmployerDashboard from "./pages/EmployerDashboard";
 import { Toaster } from "@/components/ui/sonner";
 import Header from "./components/shared/Header"; 
 import AuthPage from "./pages/AuthPage";
+import Dashboard from "./pages/Dashboard";
 
 function App() {
   return (
@@ -16,8 +17,9 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/jobs/:id" element={<JobDetails />} />
           <Route path="/add-job" element={<AddJob />} /> 
-          <Route path="/dashboard" element={<EmployerDashboard />} /> 
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/auth" element={<AuthPage />} />
+          <Route path="/dashboard" element={<EmployerDashboard />} /> 
         </Routes>
         <Toaster position="top-center" richColors />
       </div>
