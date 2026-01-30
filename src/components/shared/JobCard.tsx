@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { MapPin, Building2, Briefcase } from "lucide-react"; // Ikonkalar uchun
-
+import { motion } from "framer-motion";
 // Ma'lumotlar turi (Interface)
 interface JobCardProps {
   id: string;
@@ -16,6 +16,18 @@ interface JobCardProps {
 
 const JobCard = ({ id, title, company, location, salary, type, description }: JobCardProps) => {
   return (
+    <motion.div
+      // Kirish animatsiyasi
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      // Hover animatsiyasi
+      whileHover={{ 
+        y: -5, 
+        transition: { duration: 0.2 } 
+      }}
+      className="w-full"
+    >
     <Card className="hover:shadow-md transition-shadow border-slate-200">
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
@@ -53,6 +65,7 @@ const JobCard = ({ id, title, company, location, salary, type, description }: Jo
         </p>
       </CardContent>
     </Card>
+    </motion.div>
   );
 };
 
