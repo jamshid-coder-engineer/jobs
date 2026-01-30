@@ -4,18 +4,18 @@ import JobDetails from "./pages/JobDetails";
 import AddJob from "./pages/AddJob";
 import EmployerDashboard from "./pages/EmployerDashboard";
 import { Toaster } from "@/components/ui/sonner";
-import Navbar from "./components/shared/Navbar";
+import Header from "./components/shared/Header"; 
 
 function App() {
   return (
     <Router>
       <div className="min-h-screen bg-slate-50 font-sans">
-        <Navbar />
+        <Header /> 
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/jobs/:id" element={<JobDetails />} />
-          <Route path="/jobs/new" element={<AddJob />} />
-          <Route path="/employer/dashboard" element={<EmployerDashboard />} /> {/* Yangi route 🎯 */}
+          <Route path="/add-job" element={<AddJob />} /> 
+          <Route path="/dashboard" element={<EmployerDashboard />} /> 
         </Routes>
         <Toaster position="top-center" richColors />
       </div>
