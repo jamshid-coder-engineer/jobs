@@ -17,29 +17,24 @@ const JobDetails = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
-  // Redux state
   const { items, status } = useAppSelector((state: RootState) => state.jobs);
   
-  // Local states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [hasApplied, setHasApplied] = useState(false); // Ariza topshirilganini tekshirish
+  const [hasApplied, setHasApplied] = useState(false);
 
   const job = items.find((item: any) => String(item.id) === String(id));
 
-  // 1. Ishlar ro'yxatini yuklash (agar bo'sh bo'lsa)
   useEffect(() => {
     if (items.length === 0 && status === "idle") {
       dispatch(fetchJobs());
     }
   }, [items.length, status, dispatch]);
 
-  // 2. Foydalanuvchi bu ishga ariza topshirganini tekshirish
   useEffect(() => {
     const checkStatus = async () => {
       try {
         const res = await axios.get("http://localhost:5000/applications");
-        // Hozirgi foydalanuvchi (fake bo'lsa ham) aynan shu jobId ga ariza yuborganmi?
         const found = res.data.some((app: any) => String(app.jobId) === String(id));
         setHasApplied(found);
       } catch (err) {
@@ -49,7 +44,6 @@ const JobDetails = () => {
     if (id) checkStatus();
   }, [id]);
 
-  // Ariza yuborish funksiyasi
   const handleApply = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -70,7 +64,7 @@ const JobDetails = () => {
     try {
       await axios.post("http://localhost:5000/applications", applicationData);
       toast.success("Arizangiz muvaffaqiyatli yuborildi! 🚀");
-      setHasApplied(true); // Tugmani darhol bloklaymiz
+      setHasApplied(true);
       setIsModalOpen(false);
     } catch (error) {
       toast.error("Xatolik: Serverga ulanib bo'lmadi.");
@@ -89,7 +83,6 @@ const JobDetails = () => {
       </Button>
 
       <div className="bg-white border rounded-[32px] p-8 shadow-sm relative">
-        {/* Header qismi */}
         <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-8">
           <div className="space-y-3">
             <Badge className="bg-blue-50 text-blue-600 border-none px-3 py-1">{job.type || "Full-time"}</Badge>
@@ -105,7 +98,6 @@ const JobDetails = () => {
           </div>
         </div>
 
-        {/* Content qismi */}
         <div className="space-y-8">
           <section>
             <h3 className="text-xl font-bold mb-4 flex items-center gap-2"><div className="w-1.5 h-6 bg-blue-600 rounded-full"></div> Vazifalar</h3>
@@ -130,7 +122,6 @@ const JobDetails = () => {
           </section>
         </div>
 
-        {/* --- DYNAMIC BUTTON --- */}
         <div className="mt-12 pt-8 border-t flex justify-center">
           <Button 
             disabled={hasApplied || isSubmitting}
@@ -150,7 +141,6 @@ const JobDetails = () => {
         </div>
       </div>
 
-      {/* --- MODAL OYNASI --- */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-[32px] p-8 max-w-md w-full shadow-2xl relative animate-in zoom-in-95 duration-200">

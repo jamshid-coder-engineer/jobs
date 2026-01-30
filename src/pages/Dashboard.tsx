@@ -5,11 +5,10 @@ import {
   Briefcase, LayoutDashboard, FileText 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAppDispatch } from "../store"; // Redux dispatch
-import { fetchJobs } from "@/store/slices/jobsSlice"; // Redux action
+import { useAppDispatch } from "../store";
+import { fetchJobs } from "@/store/slices/jobsSlice";
 import { toast } from "sonner";
 
-// --- TYPES (TypeScript uchun) ---
 interface Application {
   id: string;
   jobTitle: string;
@@ -31,7 +30,6 @@ const Dashboard = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // 1. DATA YUKLASH (Serverdan)
   const fetchData = async () => {
     try {
       const [appRes, jobRes] = await Promise.all([
@@ -49,18 +47,14 @@ const Dashboard = () => {
 
   useEffect(() => { fetchData(); }, []);
 
-  // 2. ISH E'LONINI O'CHIRISH (Full Sync)
   const deleteJob = async (id: string) => {
     if (!window.confirm("Bu e'lonni o'chirmoqchimisiz? Uni qayta tiklab bo'lmaydi!")) return;
     
     try {
-      // Serverdan o'chirish
       await axios.delete(`http://localhost:5000/jobs/${id}`);
       
-      // Dashboard state-ni yangilash
       setJobs(prev => prev.filter(job => job.id !== id));
       
-      // REDUX-NI YANGILASH (Home page uchun)
       dispatch(fetchJobs());
       
       toast.success("Vakansiya butunlay o'chirildi ✅");
@@ -69,7 +63,6 @@ const Dashboard = () => {
     }
   };
 
-  // 3. ARIZANI O'CHIRISH
   const deleteApplication = async (id: string) => {
     if (!window.confirm("Arizani o'chirishga rozimisiz?")) return;
     try {
@@ -81,7 +74,6 @@ const Dashboard = () => {
     }
   };
 
-  // 4. ARIZA STATUSINI O'ZGARTIRISH
   const updateStatus = async (id: string, status: string) => {
     try {
       await axios.patch(`http://localhost:5000/applications/${id}`, { status });
@@ -98,7 +90,6 @@ const Dashboard = () => {
 
   return (
     <div className="max-w-6xl mx-auto p-6 animate-in fade-in duration-500">
-      {/* Header & Tabs */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <h1 className="text-3xl font-black text-slate-900 flex items-center gap-3">
           <LayoutDashboard className="text-blue-600" /> Dashboard
@@ -120,7 +111,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* --- ARIZALAR BO'LIMI --- */}
       {activeTab === "applications" && (
         <div className="grid gap-4">
           {applications.map(app => (
@@ -146,7 +136,6 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* --- VAKANSIYALAR BO'LIMI --- */}
       {activeTab === "jobs" && (
         <div className="grid gap-4">
           {jobs.map(job => (

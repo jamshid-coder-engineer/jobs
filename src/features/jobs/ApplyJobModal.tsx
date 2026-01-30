@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { toast } from "sonner"; // Sonner dan toast funksiyasi 🌟
-import { Loader2, X } from "lucide-react"; // Ikonkalar
+import { toast } from "sonner";
+import { Loader2, X } from "lucide-react";
 import { 
   Dialog, 
   DialogContent, 
@@ -14,33 +14,28 @@ import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 
 const ApplyJobModal = () => {
-  const [open, setOpen] = useState(false); // Modalni yopish uchun
+  const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
-  // Form holatlari
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [file, setFile] = useState<File | null>(null);
 
-  // Siz aytgan mantiq: Ism majburiy + (email yoki telefon) bittasi bo'lishi shart
   const isFormValid = fullName !== "" && (email !== "" || phone !== "") && file !== null;
 
   const handleSubmit = async () => {
     setIsLoading(true);
     
-    // API simulyatsiyasi
     await new Promise((resolve) => setTimeout(resolve, 2000));
     
     setIsLoading(false);
-    setOpen(false); // Modalni yopish ✅
+    setOpen(false);
 
-    // Sonner orqali xabar chiqarish
     toast.success("Muvaffaqiyatli yuborildi!", {
       description: "Tez orada siz bilan bog'lanamiz.",
     });
 
-    // Formani tozalash
     setFullName("");
     setEmail("");
     setPhone("");
@@ -78,7 +73,6 @@ const ApplyJobModal = () => {
             <Input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+998" />
           </div>
 
-          {/* Fayl yuklash qismi va tanlangan faylni ko'rsatish */}
           <div className="grid gap-2">
             <Label>Rezyume (PDF, DOCX) 📄</Label>
             {file ? (

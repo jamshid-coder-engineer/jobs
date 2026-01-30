@@ -18,20 +18,19 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; 
 import { FileText, Trash2, Users, Briefcase, Clock, CheckCircle } from "lucide-react";
-import { motion } from "framer-motion"; // Animatsiya uchun
+import { motion } from "framer-motion";
 
 const EmployerDashboard = () => {
   const dispatch = useAppDispatch();
   const applications = useAppSelector((state) => state.applications.items);
   const jobs = useAppSelector((state) => state.jobs.items);
 
-  // Kartalar ketma-ket chiqishi uchun variantlar
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1 // Har bir karta 0.1s farq bilan chiqadi
+        staggerChildren: 0.1
       }
     }
   };
@@ -75,7 +74,6 @@ const EmployerDashboard = () => {
         <p className="text-slate-500 mt-1">Vakansiyalar va nomzodlarni boshqarish markazi</p>
       </div>
 
-      {/* Counter Kartalari - Staggered Animatsiya bilan */}
       <motion.div 
         variants={containerVariants}
         initial="hidden"
@@ -101,7 +99,6 @@ const EmployerDashboard = () => {
         ))}
       </motion.div>
 
-      {/* Arizalar Jadvali */}
       <motion.div 
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}

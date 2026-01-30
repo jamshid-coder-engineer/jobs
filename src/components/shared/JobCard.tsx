@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import { Building2, MapPin, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-// 1. Interface-ni aniq yozib olamiz
 interface JobCardProps {
   job: {
     id: string;
@@ -10,11 +9,9 @@ interface JobCardProps {
     company: string;
     location: string;
     salary: string;
-    // Boshqa ixtiyoriy maydonlar bo'lsa qo'shishingiz mumkin
   };
 }
 
-// 2. Komponentda props turini ko'rsatamiz
 const JobCard = ({ job }: JobCardProps) => {
   return (
     <div className="bg-white border rounded-[24px] p-6 hover:shadow-xl transition-all group">

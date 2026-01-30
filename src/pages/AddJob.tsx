@@ -17,14 +17,12 @@ const AddJob = () => {
   const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(false);
 
-  // Formani yuborish funksiyasi
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
 
     const formData = new FormData(e.currentTarget);
     
-    // Vazifalar va Talablarni vergul orqali massivga aylantiramiz
     const responsibilities = String(formData.get("responsibilities"))
       .split(",")
       .map(item => item.trim())
@@ -48,15 +46,12 @@ const AddJob = () => {
     };
 
     try {
-      // 1. Serverga yangi ishni yuboramiz
       await axios.post("http://localhost:5000/jobs", newJob);
       
       toast.success("Vakansiya muvaffaqiyatli qo'shildi! 🎉");
       
-      // 2. Redux dagi ma'lumotlarni yangilab qo'yamiz
       dispatch(fetchJobs());
       
-      // 3. Asosiy sahifaga qaytamiz
       navigate("/");
     } catch (error) {
       toast.error("Vakansiya qo'shishda xatolik yuz berdi");
@@ -66,8 +61,8 @@ const AddJob = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <Button variant="ghost" onClick={() => navigate(-1)} className="mb-6">
+    <div className="max-w-3xl mx-auto p-2 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <Button variant="ghost" onClick={() => navigate(-1)} className="mb-2">
         <ArrowLeft className="mr-2" size={18} /> Orqaga
       </Button>
 
@@ -79,38 +74,32 @@ const AddJob = () => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Ish nomi */}
             <div className="space-y-2">
               <Label className="flex items-center gap-2"><Briefcase size={16}/> Lavozim nomi</Label>
               <Input name="title" required placeholder="Masalan: Senior React Developer" className="rounded-xl h-12" />
             </div>
 
-            {/* Kompaniya nomi */}
             <div className="space-y-2">
               <Label className="flex items-center gap-2"><Building2 size={16}/> Kompaniya nomi</Label>
               <Input name="company" required placeholder="Masalan: IshTop AI" className="rounded-xl h-12" />
             </div>
 
-            {/* Manzil */}
             <div className="space-y-2">
               <Label className="flex items-center gap-2"><MapPin size={16}/> Joylashuv</Label>
               <Input name="location" required placeholder="Masalan: Toshkent yoki Remote" className="rounded-xl h-12" />
             </div>
 
-            {/* Maosh */}
             <div className="space-y-2">
               <Label className="flex items-center gap-2"><DollarSign size={16}/> Maosh (oraliq)</Label>
               <Input name="salary" required placeholder="Masalan: 1000$ - 1500$" className="rounded-xl h-12" />
             </div>
           </div>
 
-          {/* Ish turi */}
           <div className="space-y-2">
             <Label>Ish turi (Full-time, Part-time, Project)</Label>
             <Input name="type" placeholder="Full-time" className="rounded-xl h-12" />
           </div>
 
-          {/* Vazifalar */}
           <div className="space-y-2">
             <Label className="flex items-center gap-2"><ListChecks size={16}/> Vazifalar (vergul bilan ajrating)</Label>
             <textarea 
@@ -121,7 +110,6 @@ const AddJob = () => {
             ></textarea>
           </div>
 
-          {/* Talablar */}
           <div className="space-y-2">
             <Label className="flex items-center gap-2"><Plus size={16}/> Talablar (vergul bilan ajrating)</Label>
             <textarea 

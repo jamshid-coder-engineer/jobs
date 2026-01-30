@@ -27,7 +27,7 @@ const AuthPage = () => {
     if (code === "1234") {
       dispatch(loginSuccess({ phone: "+998" + phone }));
       toast.success("Xush kelibsiz! 🎉");
-      navigate(-1); // Avvalgi sahifaga qaytarish (masalan AddJob sahifasiga)
+      navigate(-1);
     } else {
       toast.error("Kod noto'g'ri");
     }

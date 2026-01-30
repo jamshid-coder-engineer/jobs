@@ -27,8 +27,6 @@ const JobFilters = () => {
           ))}
         </div>
       </div>
-      
-      {/* Kelgusida bu yerga Maosh va Tajriba filtrlarini qo'shamiz */}
     </div>
   );
 };

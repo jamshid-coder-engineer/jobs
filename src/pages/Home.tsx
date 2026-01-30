@@ -9,7 +9,6 @@ const Home = () => {
   const dispatch = useAppDispatch();
   const { items, status } = useAppSelector((state) => state.jobs);
   
-  // Qidiruv uchun local state
   const [searchTerm, setSearchTerm] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
 
@@ -19,7 +18,6 @@ const Home = () => {
     }
   }, [status, dispatch]);
 
-  // Qidiruv mantiqi: nomi, kompaniyasi yoki manzili bo'yicha filtrlaymiz
   const filteredJobs = items.filter((job) => {
     const matchesSearch = 
       job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -34,7 +32,6 @@ const Home = () => {
 
   return (
     <div className="max-w-5xl mx-auto py-10 px-4">
-      {/* Qidiruv bo'limi */}
       <div className="bg-white p-6 rounded-[32px] border shadow-sm mb-10 space-y-4 md:space-y-0 md:flex gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-3 text-slate-400" size={20} />

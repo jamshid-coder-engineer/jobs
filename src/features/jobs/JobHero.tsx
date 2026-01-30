@@ -1,7 +1,6 @@
-// src/features/jobs/JobHero.tsx
 import { Input } from "../../components/ui/input";
 import { Button } from "../../components/ui/button";
-import { Search } from "lucide-react"; // Ikonka uchun
+import { Search } from "lucide-react";
 
 const JobHero = () => {
   return (
@@ -14,7 +13,6 @@ const JobHero = () => {
           Minglab vakansiyalar va eng yaxshi kompaniyalar sizni kutmoqda.
         </p>
         
-        {/* Qidiruv paneli */}
         <div className="flex flex-col md:flex-row gap-4 max-w-4xl mx-auto p-4 bg-slate-100 rounded-xl shadow-sm">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
