@@ -15,11 +15,18 @@ function App() {
         <Header /> 
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/jobs/:id" element={<JobDetails />} />
+          
+          {/* DIQQAT: URL bilan bir xil bo'lishi kerak */}
+          {/* Agar URL /job/1 bo'lsa, bu yerda ham /job/:id bo'lishi shart */}
+          <Route path="/job/:id" element={<JobDetails />} />
+          
           <Route path="/add-job" element={<AddJob />} /> 
+          
+          {/* Dashboard yo'llarini ajratib olamiz */}
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/employer-dashboard" element={<EmployerDashboard />} /> 
+          
           <Route path="/auth" element={<AuthPage />} />
-          <Route path="/dashboard" element={<EmployerDashboard />} /> 
         </Routes>
         <Toaster position="top-center" richColors />
       </div>

@@ -1,7 +1,7 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
 import { persistStore, persistReducer } from "redux-persist";
-import storage from "redux-persist/lib/storage"; // localStorage-dan foydalanish
+import storage from "redux-persist/lib/storage";
 import jobsReducer from "./slices/jobsSlice";
 import applicationsReducer from "./slices/applicationsSlice";
 import authReducer from "./slices/authSlice";
@@ -17,25 +17,27 @@ const rootReducer = combineReducers({
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["auth", "applications"], // Faqat auth va arizalarni saqlab qolamiz
+  whitelist: ["auth", "applications"], // Faqat shu qismlar saqlanadi
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
-// 3. Store yaratamiz
+// 3. Store yaratish
 export const store = configureStore({
   reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: false, // Redux Persist uchun xatolikni oldini oladi
+      serializableCheck: false, // Redux Persist xatolarini oldini oladi
     }),
 });
 
 export const persistor = persistStore(store);
 
-// Turlarni eksport qilamiz
-export type RootState = ReturnType<typeof store.getState>;
+// --- MUHIM QISM: TypeScript turlari ---
+// RootState-ni persistedReducer-dan emas, rootReducer-dan olamiz!
+export type RootState = ReturnType<typeof rootReducer>;
 export type AppDispatch = typeof store.dispatch;
 
+// Custom hooklar
 export const useAppDispatch = () => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;

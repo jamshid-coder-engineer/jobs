@@ -1,91 +1,147 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "@/store";
-import { addJob } from "@/store/slices/jobsSlice";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Label } from "../components/ui/label";
-import { Plus, Trash2, ArrowLeft, Lock } from "lucide-react";
+import { useAppDispatch } from "../store";
+import { fetchJobs } from "@/store/slices/jobsSlice";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { 
+  Briefcase, Building2, MapPin, 
+  DollarSign, ListChecks, Plus, ArrowLeft 
+} from "lucide-react";
 import { toast } from "sonner";
-import { motion } from "framer-motion";
+import axios from "axios";
 
 const AddJob = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const { isLoggedIn } = useSelector((state: RootState) => state.auth);
+  const dispatch = useAppDispatch();
+  const [loading, setLoading] = useState(false);
 
-  const [formData, setFormData] = useState({ title: "", company: "", location: "", salary: "" });
-  const [responsibilities, setResponsibilities] = useState([""]);
-  const [requirements, setRequirements] = useState([""]);
-
-  useEffect(() => {
-    const saved = localStorage.getItem("pending_job_data");
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      setFormData(parsed.formData);
-      setResponsibilities(parsed.responsibilities);
-      setRequirements(parsed.requirements);
-    }
-  }, []);
-
-  const handleSubmit = (e: React.FormEvent) => {
+  // Formani yuborish funksiyasi
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!isLoggedIn) {
-      localStorage.setItem("pending_job_data", JSON.stringify({ formData, responsibilities, requirements }));
-      toast.warning("Avval tizimga kiring!");
-      navigate("/auth");
-      return;
-    }
-    dispatch(addJob({ id: crypto.randomUUID(), ...formData, responsibilities, requirements, type: "Full-time" }));
-    localStorage.removeItem("pending_job_data");
-    toast.success("E'lon qilindi! 🎉");
-    navigate("/");
-  };
+    setLoading(true);
 
-  const addField = (t: "resp" | "req") => t === "resp" ? setResponsibilities([...responsibilities, ""]) : setRequirements([...requirements, ""]);
-  
-  const handleArrayChange = (i: number, v: string, t: "resp" | "req") => {
-    if (t === "resp") {
-      const n = [...responsibilities]; n[i] = v; setResponsibilities(n);
-    } else {
-      const n = [...requirements]; n[i] = v; setRequirements(n);
+    const formData = new FormData(e.currentTarget);
+    
+    // Vazifalar va Talablarni vergul orqali massivga aylantiramiz
+    const responsibilities = String(formData.get("responsibilities"))
+      .split(",")
+      .map(item => item.trim())
+      .filter(item => item !== "");
+
+    const requirements = String(formData.get("requirements"))
+      .split(",")
+      .map(item => item.trim())
+      .filter(item => item !== "");
+
+    const newJob = {
+      id: crypto.randomUUID(),
+      title: formData.get("title"),
+      company: formData.get("company"),
+      location: formData.get("location"),
+      salary: formData.get("salary"),
+      type: formData.get("type") || "Full-time",
+      responsibilities,
+      requirements,
+      createdAt: new Date().toISOString(),
+    };
+
+    try {
+      // 1. Serverga yangi ishni yuboramiz
+      await axios.post("http://localhost:5000/jobs", newJob);
+      
+      toast.success("Vakansiya muvaffaqiyatli qo'shildi! 🎉");
+      
+      // 2. Redux dagi ma'lumotlarni yangilab qo'yamiz
+      dispatch(fetchJobs());
+      
+      // 3. Asosiy sahifaga qaytamiz
+      navigate("/");
+    } catch (error) {
+      toast.error("Vakansiya qo'shishda xatolik yuz berdi");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-3xl mx-auto py-10 px-4">
-      <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4"><ArrowLeft size={16} /> Orqaga</Button>
-      
-      {!isLoggedIn && (
-        <div className="bg-amber-50 text-amber-800 p-4 rounded-xl mb-6 flex gap-3 border border-amber-200">
-          <Lock size={20} /> <p className="text-sm font-medium">Diqqat: E'lon qilish uchun tizimga kirish shart.</p>
-        </div>
-      )}
+    <div className="max-w-3xl mx-auto p-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <Button variant="ghost" onClick={() => navigate(-1)} className="mb-6">
+        <ArrowLeft className="mr-2" size={18} /> Orqaga
+      </Button>
 
-      <form onSubmit={handleSubmit} className="bg-white p-8 rounded-[32px] border space-y-6 shadow-sm">
-        <h1 className="text-2xl font-bold">Vakansiya yaratish</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2"><Label>Ish nomi</Label><Input required value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} /></div>
-          <div className="space-y-2"><Label>Kompaniya</Label><Input required value={formData.company} onChange={e => setFormData({...formData, company: e.target.value})} /></div>
-        </div>
-        
-        <div className="space-y-4">
-          <Label className="text-lg font-bold">Vazifalar</Label>
-          {responsibilities.map((r, i) => (
-            <div key={i} className="flex gap-2">
-              <Input value={r} onChange={e => handleArrayChange(i, e.target.value, "resp")} />
-              <Button type="button" variant="ghost" onClick={() => setResponsibilities(responsibilities.filter((_, idx) => idx !== i))}><Trash2 size={16} /></Button>
+      <div className="bg-white border rounded-[32px] p-8 shadow-sm">
+        <h1 className="text-3xl font-black text-slate-900 mb-8 flex items-center gap-3">
+          <Plus className="bg-blue-600 text-white rounded-xl p-1" size={32} />
+          Yangi vakansiya qo'shish
+        </h1>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Ish nomi */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2"><Briefcase size={16}/> Lavozim nomi</Label>
+              <Input name="title" required placeholder="Masalan: Senior React Developer" className="rounded-xl h-12" />
             </div>
-          ))}
-          <Button type="button" variant="outline" onClick={() => addField("resp")} className="w-full border-dashed"><Plus size={16} /> Qo'shish</Button>
-        </div>
 
-        <Button type="submit" className="w-full h-14 bg-blue-600 rounded-2xl text-lg font-bold">
-          {isLoggedIn ? "Vakansiyani e'lon qilish" : "Kirish va e'lon qilish 🔒"}
-        </Button>
-      </form>
-    </motion.div>
+            {/* Kompaniya nomi */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2"><Building2 size={16}/> Kompaniya nomi</Label>
+              <Input name="company" required placeholder="Masalan: IshTop AI" className="rounded-xl h-12" />
+            </div>
+
+            {/* Manzil */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2"><MapPin size={16}/> Joylashuv</Label>
+              <Input name="location" required placeholder="Masalan: Toshkent yoki Remote" className="rounded-xl h-12" />
+            </div>
+
+            {/* Maosh */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2"><DollarSign size={16}/> Maosh (oraliq)</Label>
+              <Input name="salary" required placeholder="Masalan: 1000$ - 1500$" className="rounded-xl h-12" />
+            </div>
+          </div>
+
+          {/* Ish turi */}
+          <div className="space-y-2">
+            <Label>Ish turi (Full-time, Part-time, Project)</Label>
+            <Input name="type" placeholder="Full-time" className="rounded-xl h-12" />
+          </div>
+
+          {/* Vazifalar */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2"><ListChecks size={16}/> Vazifalar (vergul bilan ajrating)</Label>
+            <textarea 
+              name="responsibilities" 
+              required
+              className="w-full p-4 border rounded-2xl min-h-[100px] outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+              placeholder="Vazifa 1, Vazifa 2, Vazifa 3..."
+            ></textarea>
+          </div>
+
+          {/* Talablar */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2"><Plus size={16}/> Talablar (vergul bilan ajrating)</Label>
+            <textarea 
+              name="requirements" 
+              required
+              className="w-full p-4 border rounded-2xl min-h-[100px] outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+              placeholder="Talab 1, Talab 2, Talab 3..."
+            ></textarea>
+          </div>
+
+          <Button 
+            disabled={loading}
+            type="submit" 
+            className="w-full h-14 bg-blue-600 hover:bg-blue-700 rounded-2xl text-lg font-bold shadow-xl shadow-blue-100 transition-all active:scale-95"
+          >
+            {loading ? "Qo'shilmoqda..." : "Vakansiyani e'lon qilish"}
+          </Button>
+        </form>
+      </div>
+    </div>
   );
 };
 

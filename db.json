@@ -1,0 +1,65 @@
+{
+  "jobs": [
+    {
+      "id": "1",
+      "title": "Frontend Developer (React)",
+      "company": "IshTop AI",
+      "location": "Toshkent",
+      "salary": "1200$ - 2000$",
+      "responsibilities": [
+        "React komponentlar yaratish",
+        "Redux bilan ishlash"
+      ],
+      "requirements": [
+        "2 yil tajriba",
+        "TypeScript bilimi"
+      ],
+      "type": "Full-time",
+      "createdAt": "2024-03-20T10:00:00Z"
+    },
+    {
+      "id": "2",
+      "title": "Node.js Backend Engineer",
+      "company": "SoftTech",
+      "location": "Samarqand (Remote)",
+      "salary": "1500$ - 3000$",
+      "responsibilities": [
+        "API yaratish",
+        "Database dizayni"
+      ],
+      "requirements": [
+        "Express.js",
+        "PostgreSQL"
+      ],
+      "type": "Full-time",
+      "createdAt": "2024-03-21T12:00:00Z"
+    },
+    {
+      "id": "6ec47cea-5d51-4a53-bfd0-704b29cdf230",
+      "title": "flutter",
+      "company": "Google",
+      "location": "Sirdaryo",
+      "salary": "2000$- 4000$",
+      "responsibilities": [
+        "Android"
+      ],
+      "requirements": [],
+      "type": "Full-time",
+      "createdAt": "2026-01-30T19:43:34.360Z"
+    }
+  ],
+  "applications": [
+    {
+      "id": "26ec4ff6-e6dc-41f0-ad53-9dfe356ac5d5",
+      "jobId": "1",
+      "jobTitle": "Frontend Developer (React)",
+      "company": "IshTop AI",
+      "candidateName": "Gani Ganiyev",
+      "phone": "+998941234567",
+      "message": "developer",
+      "status": "accepted",
+      "createdAt": "2026-01-30T20:41:21.244Z"
+    }
+  ],
+  "users": []
+}

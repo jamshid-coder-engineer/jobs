@@ -1,116 +1,174 @@
-import { useAppSelector, RootState } from "../store";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import { 
-  Briefcase, 
-  Calendar, 
-  User, 
-  Mail, 
-  FileCheck,
-  LayoutDashboard
+  Trash2, CheckCircle2, XCircle, User, 
+  Briefcase, LayoutDashboard, FileText 
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { useAppDispatch } from "../store"; // Redux dispatch
+import { fetchJobs } from "@/store/slices/jobsSlice"; // Redux action
+import { toast } from "sonner";
+
+// --- TYPES (TypeScript uchun) ---
+interface Application {
+  id: string;
+  jobTitle: string;
+  candidateName: string;
+  status: string;
+}
+
+interface Job {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+}
 
 const Dashboard = () => {
-  // Redux-dan arizalar va ishlar ro'yxatini olamiz
-  const applications = useAppSelector((state: RootState) => state.applications.items);
-  const jobs = useAppSelector((state: RootState) => state.jobs.items);
-  const { isLoggedIn } = useAppSelector((state: RootState) => state.auth);
+  const dispatch = useAppDispatch();
+  const [activeTab, setActiveTab] = useState<"applications" | "jobs">("applications");
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  if (!isLoggedIn) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-6">
-        <div className="bg-slate-100 p-6 rounded-full mb-4">
-          <LayoutDashboard size={48} className="text-slate-400" />
-        </div>
-        <h2 className="text-2xl font-bold text-slate-900">Dashboardga xush kelibsiz</h2>
-        <p className="text-slate-500 mt-2 max-w-sm">
-          Arizalaringizni ko'rish uchun iltimos tizimga kiring.
-        </p>
-      </div>
-    );
-  }
+  // 1. DATA YUKLASH (Serverdan)
+  const fetchData = async () => {
+    try {
+      const [appRes, jobRes] = await Promise.all([
+        axios.get("http://localhost:5000/applications"),
+        axios.get("http://localhost:5000/jobs")
+      ]);
+      setApplications(appRes.data.reverse());
+      setJobs(jobRes.data.reverse());
+    } catch (err) {
+      toast.error("Ma'lumot yuklashda xatolik");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchData(); }, []);
+
+  // 2. ISH E'LONINI O'CHIRISH (Full Sync)
+  const deleteJob = async (id: string) => {
+    if (!window.confirm("Bu e'lonni o'chirmoqchimisiz? Uni qayta tiklab bo'lmaydi!")) return;
+    
+    try {
+      // Serverdan o'chirish
+      await axios.delete(`http://localhost:5000/jobs/${id}`);
+      
+      // Dashboard state-ni yangilash
+      setJobs(prev => prev.filter(job => job.id !== id));
+      
+      // REDUX-NI YANGILASH (Home page uchun)
+      dispatch(fetchJobs());
+      
+      toast.success("Vakansiya butunlay o'chirildi ✅");
+    } catch (err) {
+      toast.error("O'chirishda xatolik yuz berdi");
+    }
+  };
+
+  // 3. ARIZANI O'CHIRISH
+  const deleteApplication = async (id: string) => {
+    if (!window.confirm("Arizani o'chirishga rozimisiz?")) return;
+    try {
+      await axios.delete(`http://localhost:5000/applications/${id}`);
+      setApplications(prev => prev.filter(app => app.id !== id));
+      toast.success("Ariza o'chirildi");
+    } catch (err) {
+      toast.error("Xatolik");
+    }
+  };
+
+  // 4. ARIZA STATUSINI O'ZGARTIRISH
+  const updateStatus = async (id: string, status: string) => {
+    try {
+      await axios.patch(`http://localhost:5000/applications/${id}`, { status });
+      setApplications(prev => prev.map(app => 
+        app.id === id ? { ...app, status } : app
+      ));
+      toast.info(`Holat: ${status}`);
+    } catch (err) {
+      toast.error("Statusni yangilab bo'lmadi");
+    }
+  };
+
+  if (loading) return <div className="p-20 text-center font-bold text-slate-400">Ma'lumot yuklanmoqda...</div>;
 
   return (
-    <div className="max-w-6xl mx-auto py-10 px-4">
-      <div className="flex items-center gap-3 mb-8">
-        <h1 className="text-3xl font-black text-slate-900">Mening arizalarim</h1>
-        <Badge variant="secondary" className="text-blue-600 bg-blue-50 px-3 py-1 rounded-lg">
-          {applications.length} ta ariza
-        </Badge>
+    <div className="max-w-6xl mx-auto p-6 animate-in fade-in duration-500">
+      {/* Header & Tabs */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <h1 className="text-3xl font-black text-slate-900 flex items-center gap-3">
+          <LayoutDashboard className="text-blue-600" /> Dashboard
+        </h1>
+        
+        <div className="flex bg-slate-100 p-1.5 rounded-2xl border shadow-inner">
+          <button 
+            onClick={() => setActiveTab("applications")}
+            className={`px-6 py-2 rounded-xl font-bold text-sm transition-all duration-300 ${activeTab === "applications" ? "bg-white shadow-md text-blue-600 scale-105" : "text-slate-500 hover:text-slate-800"}`}
+          >
+            Arizalar ({applications.length})
+          </button>
+          <button 
+            onClick={() => setActiveTab("jobs")}
+            className={`px-6 py-2 rounded-xl font-bold text-sm transition-all duration-300 ${activeTab === "jobs" ? "bg-white shadow-md text-blue-600 scale-105" : "text-slate-500 hover:text-slate-800"}`}
+          >
+            Vakansiyalar ({jobs.length})
+          </button>
+        </div>
       </div>
 
-      {applications.length === 0 ? (
-        <div className="bg-white border-2 border-dashed border-slate-200 rounded-[32px] p-20 text-center">
-          <p className="text-slate-400 font-medium text-lg">Hali hech qanday ishga ariza topshirmagansiz.</p>
+      {/* --- ARIZALAR BO'LIMI --- */}
+      {activeTab === "applications" && (
+        <div className="grid gap-4">
+          {applications.map(app => (
+            <div key={app.id} className="bg-white border rounded-[28px] p-6 flex flex-col md:flex-row justify-between items-center gap-4 hover:shadow-xl hover:border-blue-100 transition-all group">
+              <div className="flex items-center gap-4 w-full">
+                <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300 shadow-sm">
+                  <User size={28}/>
+                </div>
+                <div>
+                  <h3 className="font-black text-slate-800 text-lg">{app.candidateName}</h3>
+                  <p className="text-sm text-slate-500 flex items-center gap-1.5 font-medium">
+                    <Briefcase size={16} className="text-blue-400" /> {app.jobTitle}
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-2 w-full md:w-auto justify-end border-t md:border-t-0 pt-4 md:pt-0">
+                <Button variant="ghost" size="sm" onClick={() => updateStatus(app.id, "accepted")} className="text-green-600 hover:bg-green-50 rounded-xl h-11 w-11 p-0"><CheckCircle2 size={22}/></Button>
+                <Button variant="ghost" size="sm" onClick={() => updateStatus(app.id, "rejected")} className="text-orange-500 hover:bg-orange-50 rounded-xl h-11 w-11 p-0"><XCircle size={22}/></Button>
+                <Button variant="ghost" size="sm" onClick={() => deleteApplication(app.id)} className="text-red-400 hover:bg-red-50 hover:text-red-600 rounded-xl h-11 w-11 p-0"><Trash2 size={22}/></Button>
+              </div>
+            </div>
+          ))}
         </div>
-      ) : (
-        <div className="grid gap-6">
-          {applications.map((app, index) => {
-            // Har bir arizaga mos keladigan ish ma'lumotlarini topamiz
-            const job = jobs.find((j) => j.id === app.jobId);
+      )}
 
-            return (
-              <motion.div
-                key={app.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
+      {/* --- VAKANSIYALAR BO'LIMI --- */}
+      {activeTab === "jobs" && (
+        <div className="grid gap-4">
+          {jobs.map(job => (
+            <div key={job.id} className="bg-white border rounded-[28px] p-6 flex flex-col md:flex-row justify-between items-center gap-4 hover:shadow-xl transition-all border-l-8 border-l-blue-600 shadow-sm">
+              <div className="flex items-center gap-4 w-full">
+                <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-500">
+                  <FileText size={28}/>
+                </div>
+                <div>
+                  <h3 className="font-black text-slate-800 text-lg">{job.title}</h3>
+                  <p className="text-sm font-semibold text-slate-400 uppercase tracking-tight">{job.company} • {job.location}</p>
+                </div>
+              </div>
+              <Button 
+                variant="ghost" 
+                onClick={() => deleteJob(job.id)} 
+                className="text-red-500 hover:bg-red-50 hover:border-red-200 border border-transparent rounded-2xl px-6 h-12 font-bold transition-all active:scale-95"
               >
-                <Card className="rounded-[24px] overflow-hidden border-slate-200 hover:shadow-lg transition-all group">
-                  <div className="flex flex-col md:flex-row">
-                    {/* Chap taraf: Ish haqida ma'lumot */}
-                    <CardHeader className="flex-1 bg-slate-50/50 p-6 border-r border-slate-100">
-                      <div className="flex items-center gap-2 text-blue-600 mb-2">
-                        <Briefcase size={18} />
-                        <span className="text-sm font-bold uppercase tracking-wider">Vakansiya</span>
-                      </div>
-                      <CardTitle className="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
-                        {job?.title || "Noma'lum vakansiya"}
-                      </CardTitle>
-                      <p className="text-slate-500 font-medium">{job?.company || "Kompaniya mavjud emas"}</p>
-                      
-                      <div className="flex items-center gap-4 mt-6 text-sm text-slate-400 font-medium">
-                        <span className="flex items-center gap-1.5">
-                          <Calendar size={16} /> 
-                          {new Date(app.appliedAt).toLocaleDateString()}
-                        </span>
-                        <span className="flex items-center gap-1.5">
-                          <FileCheck size={16} className="text-green-500" /> 
-                          Yuborilgan
-                        </span>
-                      </div>
-                    </CardHeader>
-
-                    {/* O'ng taraf: Nomzod ma'lumotlari */}
-                    <CardContent className="flex-1 p-6 bg-white">
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
-                            <User size={20} />
-                          </div>
-                          <div>
-                            <p className="text-xs text-slate-400 font-bold uppercase">Nomzod</p>
-                            <p className="text-slate-800 font-semibold">{app.fullName}</p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center text-green-600">
-                            <Mail size={20} />
-                          </div>
-                          <div>
-                            <p className="text-xs text-slate-400 font-bold uppercase">Kontakt</p>
-                            <p className="text-slate-800 font-semibold">{app.email}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </div>
-                </Card>
-              </motion.div>
-            );
-          })}
+                <Trash2 size={20} className="mr-2" /> E'lonni o'chirish
+              </Button>
+            </div>
+          ))}
         </div>
       )}
     </div>

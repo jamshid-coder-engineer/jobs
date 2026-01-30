@@ -1,69 +1,79 @@
-import { useState } from "react";
-import { useAppSelector } from "@/store";
+import { useEffect, useState } from "react";
+import { useAppSelector, useAppDispatch } from "../store";
+import { fetchJobs } from "../store/slices/jobsSlice";
 import JobCard from "../components/shared/JobCard";
 import { Input } from "@/components/ui/input";
 import { Search, MapPin } from "lucide-react";
-import { motion } from "framer-motion";
+
 const Home = () => {
-  const [searchTitle, setSearchTitle] = useState("");
-  const [searchLocation, setSearchLocation] = useState("");
+  const dispatch = useAppDispatch();
+  const { items, status } = useAppSelector((state) => state.jobs);
+  
+  // Qidiruv uchun local state
+  const [searchTerm, setSearchTerm] = useState("");
+  const [locationFilter, setLocationFilter] = useState("");
 
-  // Redux Store'dan vakansiyalarni olamiz 📥
-  const jobs = useAppSelector((state) => state.jobs.items);
+  useEffect(() => {
+    if (status === "idle") {
+      dispatch(fetchJobs());
+    }
+  }, [status, dispatch]);
 
-  // Filtrlash
-  const filteredJobs = jobs.filter((job) => {
-    const matchesTitle = job.title.toLowerCase().includes(searchTitle.toLowerCase());
-    const matchesLocation = job.location.toLowerCase().includes(searchLocation.toLowerCase());
-    return matchesTitle && matchesLocation;
+  // Qidiruv mantiqi: nomi, kompaniyasi yoki manzili bo'yicha filtrlaymiz
+  const filteredJobs = items.filter((job) => {
+    const matchesSearch = 
+      job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.company.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesLocation = job.location.toLowerCase().includes(locationFilter.toLowerCase());
+
+    return matchesSearch && matchesLocation;
   });
 
+  if (status === "loading") return <div className="p-20 text-center">Yuklanmoqda...</div>;
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }} // Boshlang'ich holat (pastda va ko'rinmas)
-      animate={{ opacity: 1, y: 0 }}  // Paydo bo'lgandagi holat
-      exit={{ opacity: 0, y: -20 }}   // Yo'qolgandagi holat
-      transition={{ duration: 0.5 }}   // Davomiyligi
-      className="max-w-7xl mx-auto py-10 px-4"
-    >
-    <div className="max-w-5xl mx-auto py-12 px-4">
-      {/* Qidiruv paneli */}
-      <div className="bg-white rounded-xl shadow-sm border p-6 mb-8">
-        <h1 className="text-2xl font-bold text-slate-900 mb-6">Ish izlash 🔍</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-            <Input
-              placeholder="Ish nomi, kalit so'z..."
-              className="pl-10"
-              value={searchTitle}
-              onChange={(e) => setSearchTitle(e.target.value)}
-            />
-          </div>
-          <div className="relative">
-            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-            <Input
-              placeholder="Shahar, hudud..."
-              className="pl-10"
-              value={searchLocation}
-              onChange={(e) => setSearchLocation(e.target.value)}
-            />
-          </div>
+    <div className="max-w-5xl mx-auto py-10 px-4">
+      {/* Qidiruv bo'limi */}
+      <div className="bg-white p-6 rounded-[32px] border shadow-sm mb-10 space-y-4 md:space-y-0 md:flex gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-3 text-slate-400" size={20} />
+          <Input 
+            placeholder="Ish nomi yoki kompaniya..." 
+            className="pl-10 h-12 rounded-2xl border-slate-200"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <div className="relative flex-1">
+          <MapPin className="absolute left-3 top-3 text-slate-400" size={20} />
+          <Input 
+            placeholder="Shahar yoki viloyat..." 
+            className="pl-10 h-12 rounded-2xl border-slate-200"
+            value={locationFilter}
+            onChange={(e) => setLocationFilter(e.target.value)}
+          />
         </div>
       </div>
 
-      {/* Vakansiyalar ro'yxati */}
-      <div className="space-y-4">
-        {filteredJobs.length === 0 ? (
-          <div className="text-center py-20 text-slate-400">
-            Hech qanday vakansiya topilmadi 😔
-          </div>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-slate-900">
+          {searchTerm || locationFilter ? `Topilgan vakansiyalar (${filteredJobs.length})` : "Barcha vakansiyalar"}
+        </h1>
+      </div>
+
+      <div className="grid gap-6">
+        {filteredJobs.length > 0 ? (
+          filteredJobs.map((job) => (
+            <JobCard key={job.id} job={job} />
+          ))
         ) : (
-          filteredJobs.map((job) => <JobCard key={job.id} {...job} />)
+          <div className="text-center py-20 bg-slate-50 rounded-[32px] border-2 border-dashed">
+            <p className="text-slate-500 font-medium text-lg">Hech qanday vakansiya topilmadi 😕</p>
+          </div>
         )}
       </div>
     </div>
-    </motion.div>
   );
 };
 
